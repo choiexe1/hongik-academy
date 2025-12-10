@@ -35,3 +35,18 @@ ORDER BY created_at DESC;
 
 -- name: CountUsers :one
 SELECT COUNT(*) FROM users;
+
+-- name: UpdateSessionToken :exec
+UPDATE users
+SET session_token = $2
+WHERE id = $1;
+
+-- name: GetSessionToken :one
+SELECT session_token
+FROM users
+WHERE id = $1;
+
+-- name: ClearSessionToken :exec
+UPDATE users
+SET session_token = NULL
+WHERE id = $1;

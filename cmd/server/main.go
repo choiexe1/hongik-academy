@@ -4,6 +4,7 @@ import (
 	"context"
 	"html/template"
 	"log"
+	"net/http"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -34,6 +35,7 @@ func main() {
 		MaxAge:   86400 * 3, // 3일
 		HttpOnly: true,
 		Path:     "/",
+		SameSite: http.SameSiteLaxMode,
 	})
 	r.Use(sessions.Sessions("session", store))
 
@@ -93,7 +95,7 @@ func main() {
 	r.GET("/logout", authHandler.Logout)
 
 	authorized := r.Group("/")
-	authorized.Use(middleware.AuthRequired())
+	authorized.Use(middleware.AuthRequired(queries))
 	{
 		authorized.GET("/dashboard", dashboardHandler.ShowDashboard)
 
@@ -116,7 +118,7 @@ func main() {
 
 	// 관리자 전용 (admin role 필요)
 	admin := r.Group("/admin")
-	admin.Use(middleware.AuthRequired(), middleware.AdminRequired())
+	admin.Use(middleware.AuthRequired(queries), middleware.AdminRequired())
 	{
 		// 사용자 관리
 		admin.GET("/users", userHandler.ListUsers)

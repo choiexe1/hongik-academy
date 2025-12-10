@@ -167,8 +167,8 @@
                         </form>
                     </div>
                     <!-- 모바일 확장 내용 -->
-                    <div id="mobile-content-{{$eval.ID}}" class="hidden mt-3 p-3 bg-slate-50 rounded-lg">
-                        <div class="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{{$eval.Content}}</div>
+                    <div id="mobile-content-{{$eval.ID}}" class="hidden mt-3 p-3 bg-slate-50 rounded-lg overflow-hidden">
+                        <div class="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed break-all">{{$eval.Content}}</div>
                     </div>
                 </div>
                 {{end}}
@@ -224,8 +224,8 @@
                         <!-- 확장 영역 (토글) -->
                         <tr id="content-{{$eval.ID}}" class="hidden">
                             <td colspan="5" class="px-5 py-4 bg-slate-50">
-                                <div class="ml-8 p-5 bg-white rounded-xl border border-slate-200 shadow-sm">
-                                    <div class="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{{$eval.Content}}</div>
+                                <div class="ml-8 p-5 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                                    <div class="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed break-all">{{$eval.Content}}</div>
                                 </div>
                             </td>
                         </tr>

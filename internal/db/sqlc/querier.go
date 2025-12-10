@@ -6,28 +6,33 @@ package sqlc
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Querier interface {
+	ClearSessionToken(ctx context.Context, id int32) error
 	CountEvaluationsByStudent(ctx context.Context, arg CountEvaluationsByStudentParams) (int64, error)
 	CountStudents(ctx context.Context, arg CountStudentsParams) (int64, error)
 	CountUsers(ctx context.Context) (int64, error)
 	CreateEvaluation(ctx context.Context, arg CreateEvaluationParams) (Evaluation, error)
 	CreateStudent(ctx context.Context, arg CreateStudentParams) (Student, error)
-	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
 	DeleteEvaluation(ctx context.Context, id int32) error
 	DeleteStudent(ctx context.Context, id int32) error
 	DeleteUser(ctx context.Context, id int32) error
 	GetEvaluationByID(ctx context.Context, id int32) (GetEvaluationByIDRow, error)
+	GetSessionToken(ctx context.Context, id int32) (pgtype.Text, error)
 	GetStudentByID(ctx context.Context, id int32) (Student, error)
-	GetUserByID(ctx context.Context, id int32) (User, error)
-	GetUserByUsername(ctx context.Context, username string) (User, error)
+	GetUserByID(ctx context.Context, id int32) (GetUserByIDRow, error)
+	GetUserByUsername(ctx context.Context, username string) (GetUserByUsernameRow, error)
 	ListEvaluationsByStudent(ctx context.Context, arg ListEvaluationsByStudentParams) ([]ListEvaluationsByStudentRow, error)
 	ListStudents(ctx context.Context, arg ListStudentsParams) ([]Student, error)
 	ListUsers(ctx context.Context) ([]ListUsersRow, error)
 	UpdateEvaluation(ctx context.Context, arg UpdateEvaluationParams) (Evaluation, error)
+	UpdateSessionToken(ctx context.Context, arg UpdateSessionTokenParams) error
 	UpdateStudent(ctx context.Context, arg UpdateStudentParams) (Student, error)
-	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
+	UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error)
 	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error
 }
 

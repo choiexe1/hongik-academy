@@ -35,4 +35,5 @@ type User struct {
 	PasswordHash string             `json:"password_hash"`
 	Role         string             `json:"role"`
 	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	SessionToken pgtype.Text        `json:"session_token"`
 }

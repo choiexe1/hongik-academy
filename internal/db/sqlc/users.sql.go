@@ -11,6 +11,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const clearSessionToken = `-- name: ClearSessionToken :exec
+UPDATE users
+SET session_token = NULL
+WHERE id = $1
+`
+
+func (q *Queries) ClearSessionToken(ctx context.Context, id int32) error {
+	_, err := q.db.Exec(ctx, clearSessionToken, id)
+	return err
+}
+
 const countUsers = `-- name: CountUsers :one
 SELECT COUNT(*) FROM users
 `
@@ -35,14 +46,23 @@ type CreateUserParams struct {
 	Role         string `json:"role"`
 }
 
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+type CreateUserRow struct {
+	ID           int32              `json:"id"`
+	Username     string             `json:"username"`
+	Name         string             `json:"name"`
+	PasswordHash string             `json:"password_hash"`
+	Role         string             `json:"role"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
 	row := q.db.QueryRow(ctx, createUser,
 		arg.Username,
 		arg.Name,
 		arg.PasswordHash,
 		arg.Role,
 	)
-	var i User
+	var i CreateUserRow
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
@@ -64,15 +84,37 @@ func (q *Queries) DeleteUser(ctx context.Context, id int32) error {
 	return err
 }
 
+const getSessionToken = `-- name: GetSessionToken :one
+SELECT session_token
+FROM users
+WHERE id = $1
+`
+
+func (q *Queries) GetSessionToken(ctx context.Context, id int32) (pgtype.Text, error) {
+	row := q.db.QueryRow(ctx, getSessionToken, id)
+	var session_token pgtype.Text
+	err := row.Scan(&session_token)
+	return session_token, err
+}
+
 const getUserByID = `-- name: GetUserByID :one
 SELECT id, username, name, password_hash, role, created_at
 FROM users
 WHERE id = $1
 `
 
-func (q *Queries) GetUserByID(ctx context.Context, id int32) (User, error) {
+type GetUserByIDRow struct {
+	ID           int32              `json:"id"`
+	Username     string             `json:"username"`
+	Name         string             `json:"name"`
+	PasswordHash string             `json:"password_hash"`
+	Role         string             `json:"role"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+}
+
+func (q *Queries) GetUserByID(ctx context.Context, id int32) (GetUserByIDRow, error) {
 	row := q.db.QueryRow(ctx, getUserByID, id)
-	var i User
+	var i GetUserByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
@@ -90,9 +132,18 @@ FROM users
 WHERE username = $1
 `
 
-func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
+type GetUserByUsernameRow struct {
+	ID           int32              `json:"id"`
+	Username     string             `json:"username"`
+	Name         string             `json:"name"`
+	PasswordHash string             `json:"password_hash"`
+	Role         string             `json:"role"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+}
+
+func (q *Queries) GetUserByUsername(ctx context.Context, username string) (GetUserByUsernameRow, error) {
 	row := q.db.QueryRow(ctx, getUserByUsername, username)
-	var i User
+	var i GetUserByUsernameRow
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
@@ -144,6 +195,22 @@ func (q *Queries) ListUsers(ctx context.Context) ([]ListUsersRow, error) {
 	return items, nil
 }
 
+const updateSessionToken = `-- name: UpdateSessionToken :exec
+UPDATE users
+SET session_token = $2
+WHERE id = $1
+`
+
+type UpdateSessionTokenParams struct {
+	ID           int32       `json:"id"`
+	SessionToken pgtype.Text `json:"session_token"`
+}
+
+func (q *Queries) UpdateSessionToken(ctx context.Context, arg UpdateSessionTokenParams) error {
+	_, err := q.db.Exec(ctx, updateSessionToken, arg.ID, arg.SessionToken)
+	return err
+}
+
 const updateUser = `-- name: UpdateUser :one
 UPDATE users
 SET name = $2, role = $3
@@ -157,9 +224,18 @@ type UpdateUserParams struct {
 	Role string `json:"role"`
 }
 
-func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
+type UpdateUserRow struct {
+	ID           int32              `json:"id"`
+	Username     string             `json:"username"`
+	Name         string             `json:"name"`
+	PasswordHash string             `json:"password_hash"`
+	Role         string             `json:"role"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error) {
 	row := q.db.QueryRow(ctx, updateUser, arg.ID, arg.Name, arg.Role)
-	var i User
+	var i UpdateUserRow
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
