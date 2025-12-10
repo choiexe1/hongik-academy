@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: academy-db
+    environment:
+      POSTGRES_USER: ${DB_USER:-academy}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-academy123}
+      POSTGRES_DB: ${DB_NAME:-academy}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-academy} -d ${DB_NAME:-academy}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pgdata:
